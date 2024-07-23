@@ -6,6 +6,7 @@ var logger = require('morgan');
 const catalogRouter = require('./routes/catalog');
 const compression = require('compression');
 const helmet = require('helmet');
+const RateLimimt = require('express-rate-limit');
 require('./config/db.config'); // connect to database
 
 var indexRouter = require('./routes/index');
@@ -31,6 +32,14 @@ app.use(
         },
     })
 );
+// Set up rate limiter: maximum of 30 requests per minute
+const RateLimit = require('express-rate-limit');
+const limiter = RateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 30,
+});
+// Apply rate limiter to all requests
+app.use(limiter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
