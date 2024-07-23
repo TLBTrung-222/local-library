@@ -15,3 +15,8 @@ block content
             p 
                 strong Due-back: 
                 | #{bookInstance.due_back}
+    hr
+    p
+        a(href=`/catalog/bookinstance/${bookInstance._id}/delete`) Delete BookInstance
+    p
+        a(href=`/catalog/bookinstance/${bookInstance._id}/update`) Update BookInstance
