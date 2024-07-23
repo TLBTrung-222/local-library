@@ -1,0 +1,49 @@
+extends layout 
+
+block content 
+    //- need to pass: book (to pre-fill infors), author, genre
+    h1= title 
+
+    form(action="", method="post") 
+        div.form-group
+            label(for="title") Title:
+            input#title.form-control(type='text' name='title' required placeholder='Name of the book' value=(book===undefined? '' : book.title))
+        div.form-group
+            label(for="authorSelect") Author:
+            select#authorSelect.form-control(name="author") 
+                option(value="") --Select an Author--
+                each author in authors 
+                    if book 
+                        if book.author.toString()===author._id.toString()
+                            option(value=author._id selected) #{author.name}
+                        else 
+                            option(value=author._id) #{author.name}
+                    else 
+                        option(value=author._id) #{author.name}
+        div.form-group
+            label(for="summary") Summary:
+            input#summary.form-control(type='text' name='summary' required placeholder='Summary of the book' value=(book===undefined? '': book.summary))
+        div.form-group
+            label(for="isbn") ISBN:
+            input#isbn.form-control(type='text' name='isbn' required placeholder='ISBN13' value=(book===undefined? '': book.isbn))
+        div.form-group
+            label(for="genre") Genre:
+            // req.body.genre is an array of 'value' property
+            each genre in genres
+                div.form-check
+                    if book 
+                        if book.genre.includes(genre._id.toString())
+                            input.form-check-input(id=genre._id type='checkbox' name='genre' value=genre._id checked) 
+                            label.form-check-label(for=genre._id) #{genre.name}
+                        else 
+                            input.form-check-input(id=genre._id type='checkbox' name='genre' value=genre._id) 
+                            label.form-check-label(for=genre._id) #{genre.name}
+                    else    
+                        input.form-check-input(id=genre._id type='checkbox' name='genre' value=genre._id) 
+                        label.form-check-label(for=genre._id) #{genre.name}
+        button.btn.btn-primary(type="submit") Submit
+
+    if errors
+        ul
+        for error in errors
+            li= error.msg

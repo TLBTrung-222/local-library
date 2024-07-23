@@ -1,0 +1,17 @@
+extends layout 
+
+block content 
+    h1 ID: #{bookInstance._id}
+    p
+        strong Title: 
+        a(href=`/catalog/book/${bookInstance.associatedBook._id}`)  #{bookInstance.associatedBook.title}
+        p 
+            strong Imprint: 
+            | #{bookInstance.imprint}
+        p 
+            strong Status: 
+            | #{bookInstance.status}
+        if ["Maintenance", "Loaned"].includes(bookInstance.status)
+            p 
+                strong Due-back: 
+                | #{bookInstance.due_back}

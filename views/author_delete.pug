@@ -1,0 +1,18 @@
+extends layout 
+
+block content
+    //- Need to pass: author, booksFromAuthor
+    h1= title + ': ' + author.name 
+    p= author.lifespan
+    if booksFromAuthor!==undefined && booksFromAuthor.length > 0
+        p #[strong Delete the following books before attempting to delete this author:]
+        ul 
+            each book in booksFromAuthor
+                li 
+                    a(href=book.url) #{book.title}
+
+    else 
+        p Do you really want to delete this author?
+        form(action="", method="post") 
+            input(type="hidden", name='author_id', value=author._id)
+            button.btn.btn-primary(type="submit") Delete

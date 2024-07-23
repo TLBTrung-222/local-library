@@ -1,0 +1,15 @@
+extends layout
+
+block content
+    h1 Book List
+    if bookList
+        ul 
+            each book in bookList
+                li 
+                    a(href=book.url) #{book.title}
+                    if book.author
+                        |  (#{book.author.name})
+                    else
+                        | &nbsp;(No author)
+    else
+        p No books found.

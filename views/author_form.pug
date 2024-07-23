@@ -1,0 +1,19 @@
+extends layout 
+
+
+block content 
+    h1= title 
+    form(method="post") 
+        div.form-group
+            label(for="first_name") First name: 
+            input#first_name.form-control(type="text" name="first_name" placeholder="Your first name" required)
+        div.form-group   
+            label(for="family_name") Family name: 
+            input#family_name.form-control(type="text", name="family_name" placeholder="Your family name" required)
+        div.form-group  
+            label(for="date_of_birth") Date of birth: 
+            input#date_of_birth.form-control(type="date", name="date_of_birth")
+        div.form-group  
+            label(for="date_of_death") Date of death: 
+            input#date_of_death.form-control(type="date", name="date_of_death")
+        button.btn.btn-primary(type="submit") Submit

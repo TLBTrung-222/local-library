@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  h1 Local Library home 
+  p Trung's 
+    em local library
+    | , a basic Express app
+
+  h1 Dynamic contents
+  p The library has the following record counts:
+  ul 
+    li 
+      strong Books: 
+      | #{numBooks}
+    li 
+      strong Copies: 
+      | #{numCopies}
+    li 
+      strong Copies available:
+      | #{numCopiesAvailable}
+    li 
+      strong Authors: 
+      | #{numAuthors}
+    li 
+      strong Genre: 
+      | #{numGenre}
