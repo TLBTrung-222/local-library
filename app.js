@@ -1,20 +1,17 @@
-var createError = require('http-errors');
+//_ ----------- Initialize app --------------------------------------------
 var express = require('express');
+require('./config/db.config'); // connect to database
+var app = express();
+
+var createError = require('http-errors');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const catalogRouter = require('./routes/catalog');
 const compression = require('compression');
 const helmet = require('helmet');
-const RateLimimt = require('express-rate-limit');
-require('./config/db.config'); // connect to database
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+//_ ----------- Use middlewares --------------------------------------------
 
-var app = express();
-
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -40,8 +37,70 @@ const limiter = RateLimit({
 });
 // Apply rate limiter to all requests
 app.use(limiter);
-
 app.use(express.static(path.join(__dirname, 'public')));
+
+//_ ----------- Authenticate middleware ------------------------------------
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const User = require('./models/user');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+
+//_ configure passport middleware
+// create local strategy
+passport.use(
+    new LocalStrategy(async (username, password, done) => {
+        try {
+            const user = await User.findOne({ username: username }).exec();
+
+            if (!user) {
+                return done(null, false, { message: 'Wrong username' });
+            }
+            if (!user.validatePassword(password)) {
+                return done(null, false, { message: 'Wrong password' });
+            }
+            return done(null, user);
+        } catch (error) {
+            return done(error);
+        }
+    })
+);
+// serialize and deserialize session (for userId)
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    const user = await User.findById(id).exec();
+    if (!user) return done(err);
+    return done(null, user);
+});
+// done configure passport, now use passport.authenticate to protect route
+
+//_ we use session, so express-session come in handy
+app.use(
+    session({
+        secret: 'local-library-session-secret',
+        resave: false,
+        saveUninitialized: false,
+        store: new MongoStore({
+            collectionName: 'session',
+            mongoUrl: process.env.MONGO_URI,
+            ttl: 7 * 24 * 60 * 60, // 7 days. 14 Default.
+        }),
+    })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+//_ ----------- Handle routers --------------------------------------------
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+const catalogRouter = require('./routes/catalog');
+const auth = require('./lib/auth');
+
+app.use(auth);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
