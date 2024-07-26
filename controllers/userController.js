@@ -35,10 +35,12 @@ exports.register_post = [
     body('password', 'Password must be between 4-32 characters long.')
         .isLength({ min: 4, max: 32 })
         .trim(),
-    body('password_confirm', 'Password must be between 4-32 characters long.')
+    body(
+        'passwordConfirm',
+        'Password confirm must be between 4-32 characters long.'
+    )
         .isLength({ min: 4, max: 32 })
         .trim(),
-    body('*').escape(),
 
     asyncHandler(async (req, res) => {
         const errors = validationResult(req);
@@ -82,6 +84,21 @@ exports.register_post = [
         });
     }),
 ];
+
+exports.profile = (req, res, next) => {
+    res.send('Not implemented profile');
+};
+
+// get request on logout
+exports.log_out = (req, res, next) => {
+    req.logOut(function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.redirect('/');
+    });
+    // req.session.destroy();
+};
 
 // if user already log in, redirect user to home page
 function isAlreadyLogin(req, res, next) {

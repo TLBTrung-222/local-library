@@ -10,7 +10,7 @@ var logger = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
 
-//_ ----------- Use middlewares --------------------------------------------
+//_ ----------- Use essential middlewares --------------------------------------------
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -39,45 +39,12 @@ const limiter = RateLimit({
 app.use(limiter);
 app.use(express.static(path.join(__dirname, 'public')));
 
-//_ ----------- Authenticate middleware ------------------------------------
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const User = require('./models/user');
+//_ ----------- Session middleware ------------------------------------
+// our server use session, so express-session come in handy
+// we save the session to mongodb => connect-mongo
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
-//_ configure passport middleware
-// create local strategy
-passport.use(
-    new LocalStrategy(async (username, password, done) => {
-        try {
-            const user = await User.findOne({ username: username }).exec();
-
-            if (!user) {
-                return done(null, false, { message: 'Wrong username' });
-            }
-            if (!user.validatePassword(password)) {
-                return done(null, false, { message: 'Wrong password' });
-            }
-            return done(null, user);
-        } catch (error) {
-            return done(error);
-        }
-    })
-);
-// serialize and deserialize session (for userId)
-passport.serializeUser((user, done) => {
-    done(null, user._id);
-});
-
-passport.deserializeUser(async (id, done) => {
-    const user = await User.findById(id).exec();
-    if (!user) return done(err);
-    return done(null, user);
-});
-// done configure passport, now use passport.authenticate to protect route
-
-//_ we use session, so express-session come in handy
 app.use(
     session({
         secret: 'local-library-session-secret',
@@ -86,12 +53,21 @@ app.use(
         store: new MongoStore({
             collectionName: 'session',
             mongoUrl: process.env.MONGO_URI,
-            ttl: 7 * 24 * 60 * 60, // 7 days. 14 Default.
+            ttl: 5 * 60 * 60, // 5 hours (in s)
         }),
+        cookie: {
+            maxAge: 5 * 60 * 60 * 1000, // 5 hours (in ms)
+            httpOnly: true,
+        },
     })
 );
 
+//_ ----------- Authenticate middleware ------------------------------------
+// use configured passport middleware
+const passport = require('./config/passport');
+
 app.use(passport.initialize());
+// restore all session from mongo => check if user already logged in,etc...
 app.use(passport.session());
 
 //_ ----------- Handle routers --------------------------------------------
