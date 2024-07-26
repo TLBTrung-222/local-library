@@ -37,6 +37,10 @@ To get this project up and running locally on your computer:
 
 > **Note:** The library uses a default MongoDB database hosted on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas). You should use a different database for your own code experiments.
 
-### Note
+# Tech stack:
 
-I haven't implement bookinstance_update, author_update, genre_delete + genre_update controllers
+Server: Express
+View engine: pug.js
+Database: MongoDB
+ORM: mongoose
+Authentication: passport.js
