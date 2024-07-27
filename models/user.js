@@ -15,7 +15,6 @@ const UserSchema = new Schema({
     salt: {
         type: String,
         required: true,
-        default: () => crypto.randomBytes(16).toString('hex'),
     },
     // no need to fill in
     hash: {
@@ -39,24 +38,18 @@ const UserSchema = new Schema({
 });
 
 UserSchema.virtual('url').get(function () {
-    return '/user/' + this._id;
+    return '/users/' + this._id;
 });
 
-// Pre-save hook to hash password before saving
-UserSchema.pre('save', function (next) {
-    if (this.isModified('hash') || this.isNew) {
-        // Check if the password has been modified or it's a new document
-        try {
-            this.salt = crypto.randomBytes(16).toString('hex');
-            this.hash = crypto
-                .pbkdf2Sync(this.hash, this.salt, 10000, 128, 'sha512')
-                .toString('hex');
-        } catch (error) {
-            return next(error); // Pass error to next to handle it
-        }
-    }
-    next();
-});
+// need to call whenever save/update user
+UserSchema.methods.setPassword = function (password) {
+    // Create a salt for the user.
+    this.salt = crypto.randomBytes(16).toString('hex');
+    // Use salt to create hashed password.
+    this.hash = crypto
+        .pbkdf2Sync(password, this.salt, 10000, 128, 'sha512')
+        .toString('hex');
+};
 
 // compare if user filled in correct password
 UserSchema.methods.validatePassword = function (comparePassword) {

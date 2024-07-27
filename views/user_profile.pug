@@ -2,3 +2,10 @@ extends layout
 
 
 block content
+    h1 User profile 
+    p Full name: #{user.fullname}
+    p Role:  #{user.role}
+    p username: #{user.username}
+    p email: #{user.email}
+    button.btn 
+        a(href=`${user.url}/update`) Update infor

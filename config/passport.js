@@ -36,5 +36,4 @@ passport.deserializeUser(async (id, done) => {
     return done(null, user);
 });
 
-//_ Initialize and load login state from session store
 module.exports = passport;

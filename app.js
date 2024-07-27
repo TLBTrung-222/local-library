@@ -67,8 +67,27 @@ app.use(
 const passport = require('./config/passport');
 
 app.use(passport.initialize());
-// restore all session from mongo => check if user already logged in,etc...
 app.use(passport.session());
+
+// pass isAuthenticated and currentUser to all views using res.locals
+app.use((req, res, next) => {
+    // Delete salt and hash fields from req.user object before passing it.
+    if (req.user) {
+        // we want to exclude salt and hash
+        res.locals.isAuthenticated = req.isAuthenticated;
+        
+        // Create a deep copy of req.user to avoid modifying the original object.
+        const safeUser = req.user ? JSON.parse(JSON.stringify(req.user)) : null;
+        // remember that req.user is document from mongoose so to delete direct
+        // we need to use _doc property: delete req.user._doc.salt
+        if (safeUser) {
+            delete safeUser.salt;
+            delete safeUser.hash;
+        }
+        res.locals.current_user = safeUser;
+    }
+    return next();
+});
 
 //_ ----------- Handle routers --------------------------------------------
 var indexRouter = require('./routes/index');
@@ -82,6 +101,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/catalog', catalogRouter);
 
+//_ ----------- Error handler --------------------------------------------
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
