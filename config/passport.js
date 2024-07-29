@@ -9,6 +9,7 @@ const verifyFunc = async (username, password, done) => {
 
         if (!user) {
             return done(null, false, { message: 'Wrong username' });
+            // message is use for req.flash later
         }
         if (!user.validatePassword(password)) {
             return done(null, false, { message: 'Wrong password' });
