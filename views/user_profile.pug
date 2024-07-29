@@ -9,3 +9,8 @@ block content
     p email: #{user.email}
     button.btn 
         a(href=`${user.url}/update`) Update infor
+
+    if messages 
+        ul 
+            each message in messages 
+                p #[li= message]

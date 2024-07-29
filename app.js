@@ -9,6 +9,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
+const flash = require('express-flash');
 
 //_ ----------- Use essential middlewares --------------------------------------------
 
@@ -20,6 +21,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(compression());
+app.use(flash());
+
 // Add helmet to the middleware chain.
 // Set CSP headers to allow our Bootstrap and Jquery to be served
 app.use(
@@ -41,26 +44,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //_ ----------- Session middleware ------------------------------------
 // our server use session, so express-session come in handy
-// we save the session to mongodb => connect-mongo
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
 
-app.use(
-    session({
-        secret: 'local-library-session-secret',
-        resave: false,
-        saveUninitialized: false,
-        store: new MongoStore({
-            collectionName: 'session',
-            mongoUrl: process.env.MONGO_URI,
-            ttl: 5 * 60 * 60, // 5 hours (in s)
-        }),
-        cookie: {
-            maxAge: 5 * 60 * 60 * 1000, // 5 hours (in ms)
-            httpOnly: true,
-        },
-    })
-);
+const sessionConfig = require('./config/session');
+app.use(sessionConfig);
 
 //_ ----------- Authenticate middleware ------------------------------------
 // use configured passport middleware
@@ -75,7 +61,7 @@ app.use((req, res, next) => {
     if (req.user) {
         // we want to exclude salt and hash
         res.locals.isAuthenticated = req.isAuthenticated;
-        
+
         // Create a deep copy of req.user to avoid modifying the original object.
         const safeUser = req.user ? JSON.parse(JSON.stringify(req.user)) : null;
         // remember that req.user is document from mongoose so to delete direct
@@ -95,6 +81,7 @@ var usersRouter = require('./routes/users');
 const catalogRouter = require('./routes/catalog');
 const auth = require('./lib/auth');
 
+// guard before every '/catalog' request
 app.use(auth);
 
 app.use('/', indexRouter);

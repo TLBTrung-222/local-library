@@ -13,4 +13,8 @@ block content
         button.btn
             a(href="/users/register") Register 
 
-    
+    br
+    if errors
+        ul
+        for error in errors
+            li!= error.msg

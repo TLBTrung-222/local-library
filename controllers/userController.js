@@ -3,17 +3,28 @@ const passport = require('passport');
 const User = require('../models/user');
 const { body, validationResult } = require('express-validator');
 
+// Display login form on GET.
 exports.login_get = [
     isAlreadyLogin,
-    (req, res) => {
-        res.render('user_login', {});
+
+    function (req, res, next) {
+        // get the error message from 'auth' or success message from 'register' (if exist)
+        const messages = extractFlashMessages(req);
+
+        res.render('user_login', {
+            title: 'Login',
+            errors: messages.length > 0 ? messages : null,
+        });
     },
 ];
 
-exports.login_post = passport.authenticate('local', {
-    successRedirect: '/catalog',
-    failureRedirect: '/users/login',
-});
+exports.login_post = [
+    passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/users/login', // if login fail, redirect to login Again but with error flash
+        failureFlash: true,
+    }),
+];
 
 exports.register_get = (req, res) => {
     return res.render('user_form', {
@@ -43,18 +54,11 @@ exports.register_post = [
 
     asyncHandler(async (req, res) => {
         const errors = validationResult(req);
-        // validation error, return 400 Bad request
-        if (!errors.isEmpty()) {
-            return res.status(400).render('user_form', {
-                title: 'Error',
-                errors: errors.array(),
-            });
-        }
+        const errorsArray = errors.array();
+
         // make sure password confirm is matched
         if (req.body.passwordConfirm !== req.body.password) {
-            return res.status(400).render('user_form', {
-                title: 'Confirm password wrong',
-            });
+            errorsArray.push({ msg: 'Confirm password wrong' });
         }
         // check if user exist yet
         const userExist = await User.findOne({
@@ -63,32 +67,38 @@ exports.register_post = [
 
         // username already exist, return 409 Conflict
         if (userExist) {
-            return res.status(409).render('user_form', {
-                title: 'User already existed',
+            errorsArray.push({ msg: 'User already exist' });
+        }
+        // render again if any error occur
+        if (errorsArray.length > 0) {
+            return res.status(400).render('user_form', {
+                title: 'Create User',
+                errors: errorsArray,
                 userExist: userExist,
             });
         }
 
-        // user's infor is valid, save user
+        // user's submission is valid, save user
         const newUser = new User({
             username: req.body.username,
             fullname: req.body.fullname,
             email: req.body.email,
+            role: req.body.role,
         });
 
         newUser.setPassword(req.body.password);
         await newUser.save();
         // resource created, return 201 Created
-        res.redirect('/');
+        req.flash('success', 'Successfully registered. You can log in now!');
+        res.redirect('/users/login');
     }),
 ];
 
 exports.profile = (req, res, next) => {
     // after authenticated, req.user contains object from deserializeUser
-    // which mean a document
-    const user = req.user;
+    const messages = req.flash('success'); // load flash message from update user
 
-    res.render('user_profile', { user });
+    res.render('user_profile', { user: req.user, messages: messages });
 };
 
 exports.update_get = (req, res, next) => {
@@ -114,12 +124,13 @@ exports.update_post = [
     )
         .isLength({ min: 4, max: 32 })
         .trim(),
+    body('role', 'Role must be a number').isInt({ min: 0, max: 2 }),
     authorizeUserUpdate,
     asyncHandler(async (req, res, next) => {
         // get the information submitted, need to validated
         const errors = validationResult(req);
-        // if user change they username, make sure it have not existed yet
 
+        // if user change they username, make sure it have not existed yet
         if (req.body.username !== req.user.username) {
             // make sure username is not existed yet
             const userExist = await User.findOne({
@@ -147,24 +158,20 @@ exports.update_post = [
                 title: 'Confirm password wrong',
             });
         }
+        // find user and update manually
+        const updatedUser = await User.findOne({
+            username: req.body.username,
+        }).exec();
 
-        const updatedUser = await User.findOne(
-            { username: req.body.username },
-            {
-                username: req.body.username,
-                fullname: req.body.fullname,
-                email: req.body.email,
-            },
-            { new: true }
-        ).exec();
-
+        updatedUser.username = req.body.username;
+        updatedUser.fullname = req.body.fullname;
+        updatedUser.email = req.body.email;
+        updatedUser.role = req.body.role;
         updatedUser.setPassword(req.body.password);
         await updatedUser.save();
 
-        res.render('user_form', {
-            title: 'User updated!',
-            userExist: updatedUser,
-        });
+        req.flash('success', 'Update user succesfully');
+        res.redirect(updatedUser.url); // back to profile page
     }),
 ];
 
@@ -183,6 +190,8 @@ exports.log_out = (req, res, next) => {
     });
 };
 
+//_ ----------- Helper functions --------------------------------------------
+
 // if user already log in, redirect user to home page
 function isAlreadyLogin(req, res, next) {
     if (req.user && req.isAuthenticated()) {
@@ -196,4 +205,23 @@ function authorizeUserUpdate(req, res, next) {
         res.status(403);
         return next(Error('Fobidden request'));
     } else return next();
+}
+
+// Extract flash messages from req.flash and return an array of messages.
+function extractFlashMessages(req) {
+    var messages = [];
+    // Check if flash messages was sent. If so, populate them.
+    var errorFlash = req.flash('error');
+    var successFlash = req.flash('success');
+    console.log(`errorFlash: ${errorFlash}`);
+    console.log(`successFlash: ${successFlash}`);
+
+    // Look for error flash (get the first error).
+    if (errorFlash && errorFlash.length) messages.push({ msg: errorFlash[0] });
+
+    // Look for success flash (get the first success).
+    if (successFlash && successFlash.length)
+        messages.push({ msg: successFlash[0] });
+
+    return messages;
 }
