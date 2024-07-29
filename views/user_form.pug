@@ -1,0 +1,36 @@
+//- Use for user's sign-up, update user infor
+extends layout 
+
+block content 
+    h1= title  
+    form(action="", method="post") 
+        div.form-group
+            label(for="username") Username: 
+            input#username.form-control(type="text", name="username", required, value=(userExist===undefined?'':userExist.username))
+        div.form-group
+            label(for="password") Password:
+            input#password.form-control(type="text", name="password", required)
+        div.form-group
+            label(for="passwordConfirm") Password confirm:
+            input#passwordConfirm.form-control(type="text", name="passwordConfirm", required)
+        div.form-group
+            label(for="fullname") Full name:
+            input#fullname.form-control(type="text", name="fullname", required, value=(userExist===undefined?'':userExist.fullname))
+        div.form-group
+            label(for="role") Role: 
+            select#role.form-control(name="role")
+                option(value="0") 0 (read)
+                option(value="1") 1 (read + create + update)
+                option(value="2") 2 (read + create + update + delete)
+        div.form-group
+            label(for="email") Email: 
+            input#email.form-control(type="email", name="email", required, value=(userExist===undefined?'':userExist.email))
+        //- todo: add role here, for now use default value
+
+        button.btn.btn-primary(type="submit") Submit 
+        
+    //- validation errors
+    if errors
+        ul 
+            each error in errors
+                li= error.msg

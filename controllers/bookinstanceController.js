@@ -7,7 +7,6 @@ const { body, validationResult } = require('express-validator');
 // Display list of all BookInstances.
 exports.bookinstance_list = asyncHandler(async (req, res, next) => {
     const allBookInstances = await BookInstance.find().populate('book').exec();
-    console.log(JSON.stringify(allBookInstances[0], null, 2));
     res.render('bookinstance_list', {
         bookInstances: allBookInstances,
     });
@@ -91,7 +90,6 @@ exports.bookinstance_delete_get = asyncHandler(async (req, res, next) => {
     const bookInstance = await BookInstance.findById(req.params.id)
         .populate('book')
         .exec();
-    console.log(JSON.stringify(bookInstance, null, 2));
     if (bookInstance === null) {
         // No results.
         res.redirect('/catalog/bookinstances');
