@@ -10,7 +10,9 @@ This web application creates an online catalog for a small local library, where 
 
 For more information see the associated [MDN tutorial home page](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/Tutorial_local_library_website).
 
-> **Note** The [auth branch](/../../tree/auth) in this repository implements an _unsupported_ and _undocumented_ version of the library with User Authentication and Authorization. This may be a useful starting point for some users.
+## Live demo
+
+https://frequent-mysterious-lemon.glitch.me/
 
 ## Quick Start
 
@@ -23,6 +25,12 @@ To get this project up and running locally on your computer:
     npm install
     ```
 
+3. Create a .env file with your mongoDB url:
+
+```
+MONGO_URI=<your_mongodb_url>
+```
+
 3. Run the tutorial server, using the appropriate command line shell for your environment:
 
     ```bash
@@ -33,19 +41,20 @@ To get this project up and running locally on your computer:
     $ENV:DEBUG = "express-locallibrary-tutorial:*"; npm start
     ```
 
-4. Open a browser to <http://localhost:3000/> to open the library site.
+4. Open a browser to <http://localhost:4000/> to open the library site.
 
 > **Note:** The library uses a default MongoDB database hosted on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas). You should use a different database for your own code experiments.
 
-# Tech stack:
+## Tech stack:
 
 Server: Express
 View engine: pug.js
 Database: MongoDB
 ORM: mongoose
+Session management: express-session
 Authentication: passport.js
 
-# Authen learn:
+## Authen learn:
 
 1. `express-session` is the crucial things that manage sessions (both server and client side), after sending client a cookie contains sessionID, on subsequent request, it load the session base on sessionID (from our db) and inject into `req.session` => we can modify this object to decide what information will be stored back on db.
 
@@ -86,7 +95,7 @@ Example of `req.user`:
 
 Note that for simple username and password authen, we can just use `express-session` (by attach user infor to `req.session` object)
 
-# express-session vs passport.js
+## express-session vs passport.js
 
 You're mostly correct in your understanding of the roles of `express-session` and Passport.js, but let's clarify and expand on a few key points to give you a complete picture:
 
