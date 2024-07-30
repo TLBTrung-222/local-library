@@ -47,12 +47,12 @@ MONGO_URI=<your_mongodb_url>
 
 ## Tech stack:
 
-Server: Express
-View engine: pug.js
-Database: MongoDB
-ORM: mongoose
-Session management: express-session
-Authentication: passport.js
+Server: `Express`  
+View engine: `pug`  
+Database: `MongoDB`  
+ORM: `mongoose`  
+Session management: `express-session`  
+Authentication: `passport.js`
 
 ## Authen learn:
 
