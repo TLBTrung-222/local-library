@@ -1,4 +1,4 @@
-# express-locallibrary-tutorial
+# Local library
 
 "Local Library" website written in in Node/Express.
 
@@ -23,13 +23,13 @@ To get this project up and running locally on your computer:
     npm install
     ```
 
-3. Create a .env file with your mongoDB url:
+3. Create a `.env` file with your mongoDB url:
 
-```
-MONGO_URI=<your_mongodb_url>
-```
+    ```
+    MONGO_URI=<your_mongodb_url>
+    ```
 
-3. Run the tutorial server, using the appropriate command line shell for your environment:
+4. Run the tutorial server, using the appropriate command line shell for your environment:
 
     ```bash
     # Linux terminal
@@ -39,7 +39,7 @@ MONGO_URI=<your_mongodb_url>
     $ENV:DEBUG = "express-locallibrary-tutorial:*"; npm start
     ```
 
-4. Open a browser to <http://localhost:4000/> to open the library site.
+5. Open a browser to <http://localhost:4000/> to open the library site.
 
 > **Note:** The library uses a default MongoDB database hosted on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas). You should use a different database for your own code experiments.
 
