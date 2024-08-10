@@ -12,8 +12,6 @@ For more information see the associated [MDN tutorial home page](https://develop
 
 ## Live demo
 
-https://frequent-mysterious-lemon.glitch.me/
-
 ## Quick Start
 
 To get this project up and running locally on your computer:
@@ -49,8 +47,9 @@ MONGO_URI=<your_mongodb_url>
 
 Server: `Express`  
 View engine: `pug`  
+UI framework: `Bootstrap`  
 Database: `MongoDB`  
-ORM: `mongoose`  
+ORM/ORD: `mongoose`  
 Session management: `express-session`  
 Authentication: `passport.js`
 
